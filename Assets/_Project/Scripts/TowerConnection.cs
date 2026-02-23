@@ -104,6 +104,7 @@ namespace KingdomTower
                 if (towerA.CurrentTeam == Team.Neutral)
                 {
                     flowAtoB = false;
+                    towerA.RemoveOutgoingConnection();
                 }
             }
 
@@ -114,6 +115,7 @@ namespace KingdomTower
                 if (towerB.CurrentTeam == Team.Neutral)
                 {
                     flowBtoA = false;
+                    towerB.RemoveOutgoingConnection();
                 }
             }
 
@@ -199,9 +201,24 @@ namespace KingdomTower
 
         #region Public Methods
 
-        public void Deactivate()
+        public void Deactivate(bool notifyTowers = true)
         {
             isActive = false;
+
+            // Notify towers about remaining flows being removed
+            if (notifyTowers)
+            {
+                if (flowAtoB && towerA != null)
+                {
+                    towerA.RemoveOutgoingConnection();
+                    flowAtoB = false;
+                }
+                if (flowBtoA && towerB != null)
+                {
+                    towerB.RemoveOutgoingConnection();
+                    flowBtoA = false;
+                }
+            }
 
             if (lineRenderer != null)
             {

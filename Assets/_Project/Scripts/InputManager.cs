@@ -206,7 +206,7 @@ namespace KingdomTower
                     if (conn.HasFlowFrom(conn.TowerB))
                         conn.TowerB.RemoveOutgoingConnection();
 
-                    conn.Deactivate();
+                    conn.Deactivate(notifyTowers: false);
                     activeConnections.RemoveAt(i);
                 }
             }
