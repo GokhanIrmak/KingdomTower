@@ -34,7 +34,7 @@
 
 ---
 
-## ✅ Tamamlanan Görevler (TASK 1-11)
+## ✅ Tamamlanan Görevler (TASK 1-12)
 
 ### TASK 1: HP-Based Generation Rate System ✅
 - Kulenin HP'sine göre dinamik birim üretim hızı
@@ -103,6 +103,12 @@
 - CanvasScaler ile mobil uyumlu (1080x1920 referans, matchWidthOrHeight 0.5)
 - Panel başlangıçta gizli, oyun bitince aktif olur
 
+### TASK 12: Restart Butonu ✅
+- Oyun sonu panelinde "RESTART" butonu
+- `Button.onClick` → `GameManager.RestartLevel()` (sahneyi yeniden yükler)
+- `GameUIController.cs` içinde runtime oluşturuluyor
+- Buton renkleri Inspector'dan ayarlanabilir (`buttonColor`, `buttonTextColor`)
+
 ### Ek: Unit Collision (1v1 Yok Etme) ✅
 - Farklı takım unit'leri karşılaştığında ikisi de yok oluyor
 - `Physics.OverlapSphere` ile collision detection
@@ -140,7 +146,7 @@
 |------|----------|-------|
 | 10 | **Victory/Defeat Detection** — Tüm kuleler tek takıma geçince oyun bitsin | ✅ |
 | 11 | **Victory/Defeat UI Ekranı** — Kazanma/kaybetme pop-up'ı | ✅ |
-| 12 | **Restart Butonu** — Oyun bitince veya istediğinde yeniden başlat | ⬜ |
+| 12 | **Restart Butonu** — Oyun bitince veya istediğinde yeniden başlat | ✅ |
 | 13 | **Pause / Speed Control** — 1x / 2x / 3x hız değiştirme | ⬜ |
 
 ### Öncelik 2: Teknik Borç & Temel İyileştirmeler
@@ -288,4 +294,4 @@ Assets/
 
 ---
 
-*Son güncelleme: Şubat 2026 — TASK 1-11 + TASK 16 tamamlandı, gerçek durum koda göre güncellendi*
+*Son güncelleme: Şubat 2026 — TASK 1-12 + TASK 16 tamamlandı, gerçek durum koda göre güncellendi*

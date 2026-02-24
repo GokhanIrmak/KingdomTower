@@ -14,6 +14,8 @@ namespace KingdomTower
         [SerializeField] private Color victoryColor = new Color(0.2f, 0.6f, 1f);  // Blue
         [SerializeField] private Color defeatColor = new Color(1f, 0.3f, 0.3f);   // Red
         [SerializeField] private Color overlayColor = new Color(0f, 0f, 0f, 0.6f);
+        [SerializeField] private Color buttonColor = new Color(1f, 1f, 1f, 0.9f);
+        [SerializeField] private Color buttonTextColor = new Color(0.1f, 0.1f, 0.1f);
 
         // Runtime-created UI references
         private Canvas canvas;
@@ -94,6 +96,9 @@ namespace KingdomTower
             subtitleText = CreateText(endGamePanel.transform, "SubtitleText", "",
                 fontSize: 36, yPosition: -20f);
             subtitleText.color = Color.white;
+
+            // --- Restart button ---
+            CreateRestartButton(endGamePanel.transform, yPosition: -120f);
         }
 
         private GameObject CreatePanel(Transform parent, string name, Color color)
@@ -112,6 +117,48 @@ namespace KingdomTower
             rect.offsetMax = Vector2.zero;
 
             return panel;
+        }
+
+        private void CreateRestartButton(Transform parent, float yPosition)
+        {
+            // Button container
+            GameObject buttonObj = new GameObject("RestartButton");
+            buttonObj.transform.SetParent(parent, false);
+
+            var image = buttonObj.AddComponent<Image>();
+            image.color = buttonColor;
+
+            var button = buttonObj.AddComponent<Button>();
+            button.onClick.AddListener(OnRestartClicked);
+
+            // Size and position
+            var rect = buttonObj.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = new Vector2(0, yPosition);
+            rect.sizeDelta = new Vector2(300, 80);
+
+            // Button label
+            var label = CreateText(buttonObj.transform, "ButtonLabel", "RESTART",
+                fontSize: 40, yPosition: 0f);
+            label.color = buttonTextColor;
+
+            // Stretch label to fill button
+            var labelRect = label.GetComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = Vector2.zero;
+            labelRect.offsetMax = Vector2.zero;
+            labelRect.anchoredPosition = Vector2.zero;
+        }
+
+        private void OnRestartClicked()
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.RestartLevel();
+            }
         }
 
         private TextMeshProUGUI CreateText(Transform parent, string name, string defaultText,
