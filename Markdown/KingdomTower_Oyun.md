@@ -33,7 +33,7 @@
 
 ---
 
-## ✅ Tamamlanan Görevler (TASK 1-9)
+## ✅ Tamamlanan Görevler (TASK 1-10)
 
 ### TASK 1: HP-Based Generation Rate System ✅
 - Kulenin HP'sine göre dinamik birim üretim hızı
@@ -84,6 +84,15 @@
 - TrailRenderer ile görsel cut efekti
 - Kesilen bağlantılarda tower notify (`RemoveOutgoingConnection`)
 
+### TASK 10: Victory/Defeat Detection ✅
+- Tüm kuleler tek bir takıma geçtiğinde oyun bitiyor
+- `GameResult` enum: Victory (BlueTeam kazandı), Defeat (RedTeam kazandı)
+- `GameManager.CheckGameEndCondition()` — TowerController sahiplik değişiminde çağırıyor
+- `EvaluateGameEnd()` — 0.5s delay ile çalışır, cascading ownership değişimlerini bekler
+- `OnGameEnded` event — UI ve diğer sistemler subscribe edebilir
+- Neutral kule varken oyun bitmez, tüm kuleler tek takıma ait olmalı
+- `isGameActive = false` ile oyun durumu güncellenir
+
 ### Ek: Unit Collision (1v1 Yok Etme) ✅
 - Farklı takım unit'leri karşılaştığında ikisi de yok oluyor
 - `Physics.OverlapSphere` ile collision detection
@@ -104,12 +113,12 @@
 ### Mimari Sorunlar
 5. **InputManager Aşırı Sorumluluk** — Hem input, hem connection management, hem line cutting, hem connection limits. Single Responsibility ihlali. İleride ayrılmalı (InputHandler, ConnectionManager, CutManager).
 6. **Event System Yok** — Tüm iletişim direkt referanslarla. Yeni sistem eklemek (UI, ses, particle) mevcut kodu değiştirmeyi gerektiriyor.
-7. **GameManager Pasif** — Hiçbir sistem GameManager'ı çağırmıyor. Victory/defeat stub'ları boş.
+7. ~~**GameManager Pasif** — Hiçbir sistem GameManager'ı çağırmıyor. Victory/defeat stub'ları boş.~~ — TASK 10 ile TowerController GameManager'ı çağırıyor.
 8. **CreateConnection() Private** — `InputManager.CreateConnection()` private metot. AI Controller yazıldığında programatik connection oluşturmak için ya public yapılmalı ya da event/interface üzerinden erişim sağlanmalı.
 
 ### Bilinen Edge Cases (Test Edilmedi)
 8. **Unit hedefe giderken kule el değiştirirse** — Unit eski hedefine TakeDamage yapar, yeni sahip takıma hasar verebilir (kendi takımına saldırma senaryosu)
-9. **Tüm kuleler aynı takım olduğunda** — Oyun bitmiyor, devam ediyor (Victory detection yok)
+9. ~~**Tüm kuleler aynı takım olduğunda** — Oyun bitmiyor, devam ediyor (Victory detection yok)~~ — TASK 10 ile düzeltildi
 10. **Birden fazla bağlantı aynı anda kesilirse** — Race condition potansiyeli
 
 ---
@@ -119,7 +128,7 @@
 ### Öncelik 1: Oyunu Oynanabilir Yap
 | TASK | Açıklama | Durum |
 |------|----------|-------|
-| 10 | **Victory/Defeat Detection** — Tüm kuleler tek takıma geçince oyun bitsin | ⬜ |
+| 10 | **Victory/Defeat Detection** — Tüm kuleler tek takıma geçince oyun bitsin | ✅ |
 | 11 | **Victory/Defeat UI Ekranı** — Kazanma/kaybetme pop-up'ı | ⬜ |
 | 12 | **Restart Butonu** — Oyun bitince veya istediğinde yeniden başlat | ⬜ |
 | 13 | **Pause / Speed Control** — 1x / 2x / 3x hız değiştirme | ⬜ |
@@ -268,4 +277,4 @@ Assets/
 
 ---
 
-*Son güncelleme: Şubat 2026 — TASK 1-9 tamamlandı, gerçek durum koda göre güncellendi*
+*Son güncelleme: Şubat 2026 — TASK 1-10 + TASK 16 tamamlandı, gerçek durum koda göre güncellendi*
