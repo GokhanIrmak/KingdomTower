@@ -22,6 +22,8 @@ namespace KingdomTower
         private GameObject endGamePanel;
         private TextMeshProUGUI resultText;
         private TextMeshProUGUI subtitleText;
+        private TextMeshProUGUI speedButtonLabel;
+        private GameObject speedButton;
 
         #region Unity Lifecycle
 
@@ -29,10 +31,11 @@ namespace KingdomTower
         {
             CreateUI();
 
-            // Subscribe to game end event
+            // Subscribe to events
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.OnGameEnded += OnGameEnded;
+                GameManager.Instance.OnSpeedChanged += OnSpeedChanged;
             }
         }
 
@@ -41,6 +44,7 @@ namespace KingdomTower
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.OnGameEnded -= OnGameEnded;
+                GameManager.Instance.OnSpeedChanged -= OnSpeedChanged;
             }
         }
 
@@ -60,6 +64,12 @@ namespace KingdomTower
                 : "Your towers have fallen...";
 
             endGamePanel.SetActive(true);
+            speedButton.SetActive(false); // Hide speed button when game ends
+        }
+
+        private void OnSpeedChanged(float speed)
+        {
+            speedButtonLabel.text = $"{speed:0}x";
         }
 
         #endregion
@@ -82,6 +92,9 @@ namespace KingdomTower
             scaler.matchWidthOrHeight = 0.5f;
 
             canvasObj.AddComponent<GraphicRaycaster>();
+
+            // --- Speed button (top-right corner, always visible during gameplay) ---
+            CreateSpeedButton(canvasObj.transform);
 
             // --- End Game Panel (full-screen overlay, initially hidden) ---
             endGamePanel = CreatePanel(canvasObj.transform, "EndGamePanel", overlayColor);
@@ -117,6 +130,46 @@ namespace KingdomTower
             rect.offsetMax = Vector2.zero;
 
             return panel;
+        }
+
+        private void CreateSpeedButton(Transform parent)
+        {
+            speedButton = new GameObject("SpeedButton");
+            speedButton.transform.SetParent(parent, false);
+
+            var image = speedButton.AddComponent<Image>();
+            image.color = new Color(0f, 0f, 0f, 0.5f);
+
+            var button = speedButton.AddComponent<Button>();
+            button.onClick.AddListener(OnSpeedClicked);
+
+            // Top-right corner
+            var rect = speedButton.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(1, 1);
+            rect.anchorMax = new Vector2(1, 1);
+            rect.pivot = new Vector2(1, 1);
+            rect.anchoredPosition = new Vector2(-20, -20);
+            rect.sizeDelta = new Vector2(100, 60);
+
+            // Label
+            speedButtonLabel = CreateText(speedButton.transform, "SpeedLabel", "1x",
+                fontSize: 32, yPosition: 0f);
+
+            // Stretch label to fill button
+            var labelRect = speedButtonLabel.GetComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = Vector2.zero;
+            labelRect.offsetMax = Vector2.zero;
+            labelRect.anchoredPosition = Vector2.zero;
+        }
+
+        private void OnSpeedClicked()
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.CycleSpeed();
+            }
         }
 
         private void CreateRestartButton(Transform parent, float yPosition)

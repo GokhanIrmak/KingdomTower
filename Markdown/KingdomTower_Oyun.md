@@ -34,7 +34,7 @@
 
 ---
 
-## ✅ Tamamlanan Görevler (TASK 1-12)
+## ✅ Tamamlanan Görevler (TASK 1-13)
 
 ### TASK 1: HP-Based Generation Rate System ✅
 - Kulenin HP'sine göre dinamik birim üretim hızı
@@ -109,6 +109,14 @@
 - `GameUIController.cs` içinde runtime oluşturuluyor
 - Buton renkleri Inspector'dan ayarlanabilir (`buttonColor`, `buttonTextColor`)
 
+### TASK 13: Pause / Speed Control ✅
+- Sağ üst köşede hız butonu: 1x → 2x → 3x → 1x döngüsü
+- `GameManager.CycleSpeed()` ile `Time.timeScale` değiştiriliyor
+- `OnSpeedChanged` event — UI label otomatik güncellenir
+- `speedSteps` array Inspector'dan özelleştirilebilir (varsayılan: 1, 2, 3)
+- Oyun bitince hız butonu gizleniyor
+- `RestartLevel()` artık `Time.timeScale = 1f` ile sıfırlıyor
+
 ### Ek: Unit Collision (1v1 Yok Etme) ✅
 - Farklı takım unit'leri karşılaştığında ikisi de yok oluyor
 - `Physics.OverlapSphere` ile collision detection
@@ -147,7 +155,7 @@
 | 10 | **Victory/Defeat Detection** — Tüm kuleler tek takıma geçince oyun bitsin | ✅ |
 | 11 | **Victory/Defeat UI Ekranı** — Kazanma/kaybetme pop-up'ı | ✅ |
 | 12 | **Restart Butonu** — Oyun bitince veya istediğinde yeniden başlat | ✅ |
-| 13 | **Pause / Speed Control** — 1x / 2x / 3x hız değiştirme | ⬜ |
+| 13 | **Pause / Speed Control** — 1x / 2x / 3x hız değiştirme | ✅ |
 
 ### Öncelik 2: Teknik Borç & Temel İyileştirmeler
 | TASK | Açıklama | Durum |
@@ -294,4 +302,4 @@ Assets/
 
 ---
 
-*Son güncelleme: Şubat 2026 — TASK 1-12 + TASK 16 tamamlandı, gerçek durum koda göre güncellendi*
+*Son güncelleme: Şubat 2026 — TASK 1-13 + TASK 16 tamamlandı. Phase 1 (Oyunu Oynanabilir Yap) tamamlandı!*

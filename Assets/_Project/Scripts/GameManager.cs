@@ -38,11 +38,17 @@ namespace KingdomTower
         [Header("Victory/Defeat")]
         [SerializeField] private float endCheckDelay = 0.5f; // Small delay to let state settle
 
-        // Event fired when game ends — UI and other systems can subscribe
+        [Header("Speed Control")]
+        [SerializeField] private float[] speedSteps = { 1f, 2f, 3f };
+        private int currentSpeedIndex;
+
+        // Events
         public event Action<GameResult> OnGameEnded;
+        public event Action<float> OnSpeedChanged;
 
         // Properties
         public bool IsGameActive => isGameActive;
+        public float CurrentSpeed => speedSteps[currentSpeedIndex];
 
         #region Unity Lifecycle
 
@@ -126,10 +132,35 @@ namespace KingdomTower
         {
             Debug.Log("Restarting level...");
 
+            Time.timeScale = 1f; // Reset speed before reload
+
             // Reload the current scene
             UnityEngine.SceneManagement.SceneManager.LoadScene(
                 UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex
             );
+        }
+
+        #endregion
+
+        #region Speed Control
+
+        /// <summary>
+        /// Cycles to the next speed step (1x → 2x → 3x → 1x).
+        /// </summary>
+        public void CycleSpeed()
+        {
+            if (!isGameActive) return;
+
+            currentSpeedIndex = (currentSpeedIndex + 1) % speedSteps.Length;
+            ApplySpeed();
+        }
+
+        private void ApplySpeed()
+        {
+            float speed = speedSteps[currentSpeedIndex];
+            Time.timeScale = speed;
+
+            OnSpeedChanged?.Invoke(speed);
         }
 
         #endregion
