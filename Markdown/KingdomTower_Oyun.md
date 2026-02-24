@@ -16,7 +16,7 @@
 
 | Script | Görev |
 |--------|-------|
-| `GameManager.cs` | Singleton. Global oyun state'i, pause/resume, restart. Victory/Defeat henüz stub. |
+| `GameManager.cs` | Singleton. Global oyun state'i, pause/resume, restart. Victory/Defeat detection + OnGameEnded event. |
 | `TowerController.cs` | Kule state machine, HP yönetimi, idle HP regen, sahiplik değişimi, birim spawn |
 | `InputManager.cs` | Drag-and-drop input, connection oluşturma/yönetimi, line cutting, connection limits |
 | `UnitController.cs` | Birim hareketi (MoveTowards), düşman collision (1v1 yok etme), hedefe varınca TakeDamage |
@@ -24,6 +24,7 @@
 | `TowerStatsSO.cs` | ScriptableObject — kule istatistikleri (hız, üretim, max HP vs.) |
 | `TeamData.cs` | Team enum tanımı (BlueTeam, RedTeam, Neutral) |
 | `LookAtCamera.cs` | HP text'in kameraya bakmasını sağlayan yardımcı script |
+| `GameUIController.cs` | Oyun sonu UI — Victory/Defeat paneli, runtime Canvas oluşturma |
 
 ### Veri Yapısı
 - **ScriptableObjects** kullanılıyor tüm statik stat tanımları için
@@ -33,7 +34,7 @@
 
 ---
 
-## ✅ Tamamlanan Görevler (TASK 1-10)
+## ✅ Tamamlanan Görevler (TASK 1-11)
 
 ### TASK 1: HP-Based Generation Rate System ✅
 - Kulenin HP'sine göre dinamik birim üretim hızı
@@ -93,6 +94,15 @@
 - Neutral kule varken oyun bitmez, tüm kuleler tek takıma ait olmalı
 - `isGameActive = false` ile oyun durumu güncellenir
 
+### TASK 11: Victory/Defeat UI Ekranı ✅
+- `GameUIController.cs` — Runtime'da Canvas ve UI oluşturuyor (editor kurulumu gerektirmez)
+- `OnGameEnded` event'ine subscribe olarak çalışıyor
+- Tam ekran yarı-saydam overlay panel
+- "VICTORY" (mavi) veya "DEFEAT" (kırmızı) büyük başlık metni
+- Alt başlık açıklama metni
+- CanvasScaler ile mobil uyumlu (1080x1920 referans, matchWidthOrHeight 0.5)
+- Panel başlangıçta gizli, oyun bitince aktif olur
+
 ### Ek: Unit Collision (1v1 Yok Etme) ✅
 - Farklı takım unit'leri karşılaştığında ikisi de yok oluyor
 - `Physics.OverlapSphere` ile collision detection
@@ -129,7 +139,7 @@
 | TASK | Açıklama | Durum |
 |------|----------|-------|
 | 10 | **Victory/Defeat Detection** — Tüm kuleler tek takıma geçince oyun bitsin | ✅ |
-| 11 | **Victory/Defeat UI Ekranı** — Kazanma/kaybetme pop-up'ı | ⬜ |
+| 11 | **Victory/Defeat UI Ekranı** — Kazanma/kaybetme pop-up'ı | ✅ |
 | 12 | **Restart Butonu** — Oyun bitince veya istediğinde yeniden başlat | ⬜ |
 | 13 | **Pause / Speed Control** — 1x / 2x / 3x hız değiştirme | ⬜ |
 
@@ -254,7 +264,8 @@ Assets/
 │   ├── TowerConnection.cs
 │   ├── TowerStatsSO.cs
 │   ├── TeamData.cs
-│   └── LookAtCamera.cs
+│   ├── LookAtCamera.cs
+│   └── GameUIController.cs
 ├── ScriptableObjects/
 │   └── TowerStats/
 ├── Prefabs/
@@ -277,4 +288,4 @@ Assets/
 
 ---
 
-*Son güncelleme: Şubat 2026 — TASK 1-10 + TASK 16 tamamlandı, gerçek durum koda göre güncellendi*
+*Son güncelleme: Şubat 2026 — TASK 1-11 + TASK 16 tamamlandı, gerçek durum koda göre güncellendi*
