@@ -16,7 +16,7 @@
 
 | Script | Görev |
 |--------|-------|
-| `GameManager.cs` | Singleton. Global oyun state'i, pause/resume, restart. Victory/Defeat henüz stub. |
+| `GameManager.cs` | Singleton. Global oyun state'i, pause/resume, restart. Victory/Defeat detection + OnGameEnded event. |
 | `TowerController.cs` | Kule state machine, HP yönetimi, idle HP regen, sahiplik değişimi, birim spawn |
 | `InputManager.cs` | Drag-and-drop input, connection oluşturma/yönetimi, line cutting, connection limits |
 | `UnitController.cs` | Birim hareketi (MoveTowards), düşman collision (1v1 yok etme), hedefe varınca TakeDamage |
@@ -24,6 +24,7 @@
 | `TowerStatsSO.cs` | ScriptableObject — kule istatistikleri (hız, üretim, max HP vs.) |
 | `TeamData.cs` | Team enum tanımı (BlueTeam, RedTeam, Neutral) |
 | `LookAtCamera.cs` | HP text'in kameraya bakmasını sağlayan yardımcı script |
+| `GameUIController.cs` | Oyun sonu UI — Victory/Defeat paneli, runtime Canvas oluşturma |
 
 ### Veri Yapısı
 - **ScriptableObjects** kullanılıyor tüm statik stat tanımları için
@@ -33,7 +34,7 @@
 
 ---
 
-## ✅ Tamamlanan Görevler (TASK 1-9)
+## ✅ Tamamlanan Görevler (TASK 1-13)
 
 ### TASK 1: HP-Based Generation Rate System ✅
 - Kulenin HP'sine göre dinamik birim üretim hızı
@@ -84,6 +85,38 @@
 - TrailRenderer ile görsel cut efekti
 - Kesilen bağlantılarda tower notify (`RemoveOutgoingConnection`)
 
+### TASK 10: Victory/Defeat Detection ✅
+- Tüm kuleler tek bir takıma geçtiğinde oyun bitiyor
+- `GameResult` enum: Victory (BlueTeam kazandı), Defeat (RedTeam kazandı)
+- `GameManager.CheckGameEndCondition()` — TowerController sahiplik değişiminde çağırıyor
+- `EvaluateGameEnd()` — 0.5s delay ile çalışır, cascading ownership değişimlerini bekler
+- `OnGameEnded` event — UI ve diğer sistemler subscribe edebilir
+- Neutral kule varken oyun bitmez, tüm kuleler tek takıma ait olmalı
+- `isGameActive = false` ile oyun durumu güncellenir
+
+### TASK 11: Victory/Defeat UI Ekranı ✅
+- `GameUIController.cs` — Runtime'da Canvas ve UI oluşturuyor (editor kurulumu gerektirmez)
+- `OnGameEnded` event'ine subscribe olarak çalışıyor
+- Tam ekran yarı-saydam overlay panel
+- "VICTORY" (mavi) veya "DEFEAT" (kırmızı) büyük başlık metni
+- Alt başlık açıklama metni
+- CanvasScaler ile mobil uyumlu (1080x1920 referans, matchWidthOrHeight 0.5)
+- Panel başlangıçta gizli, oyun bitince aktif olur
+
+### TASK 12: Restart Butonu ✅
+- Oyun sonu panelinde "RESTART" butonu
+- `Button.onClick` → `GameManager.RestartLevel()` (sahneyi yeniden yükler)
+- `GameUIController.cs` içinde runtime oluşturuluyor
+- Buton renkleri Inspector'dan ayarlanabilir (`buttonColor`, `buttonTextColor`)
+
+### TASK 13: Pause / Speed Control ✅
+- Sağ üst köşede hız butonu: 1x → 2x → 3x → 1x döngüsü
+- `GameManager.CycleSpeed()` ile `Time.timeScale` değiştiriliyor
+- `OnSpeedChanged` event — UI label otomatik güncellenir
+- `speedSteps` array Inspector'dan özelleştirilebilir (varsayılan: 1, 2, 3)
+- Oyun bitince hız butonu gizleniyor
+- `RestartLevel()` artık `Time.timeScale = 1f` ile sıfırlıyor
+
 ### Ek: Unit Collision (1v1 Yok Etme) ✅
 - Farklı takım unit'leri karşılaştığında ikisi de yok oluyor
 - `Physics.OverlapSphere` ile collision detection
@@ -104,12 +137,12 @@
 ### Mimari Sorunlar
 5. **InputManager Aşırı Sorumluluk** — Hem input, hem connection management, hem line cutting, hem connection limits. Single Responsibility ihlali. İleride ayrılmalı (InputHandler, ConnectionManager, CutManager).
 6. **Event System Yok** — Tüm iletişim direkt referanslarla. Yeni sistem eklemek (UI, ses, particle) mevcut kodu değiştirmeyi gerektiriyor.
-7. **GameManager Pasif** — Hiçbir sistem GameManager'ı çağırmıyor. Victory/defeat stub'ları boş.
+7. ~~**GameManager Pasif** — Hiçbir sistem GameManager'ı çağırmıyor. Victory/defeat stub'ları boş.~~ — TASK 10 ile TowerController GameManager'ı çağırıyor.
 8. **CreateConnection() Private** — `InputManager.CreateConnection()` private metot. AI Controller yazıldığında programatik connection oluşturmak için ya public yapılmalı ya da event/interface üzerinden erişim sağlanmalı.
 
 ### Bilinen Edge Cases (Test Edilmedi)
 8. **Unit hedefe giderken kule el değiştirirse** — Unit eski hedefine TakeDamage yapar, yeni sahip takıma hasar verebilir (kendi takımına saldırma senaryosu)
-9. **Tüm kuleler aynı takım olduğunda** — Oyun bitmiyor, devam ediyor (Victory detection yok)
+9. ~~**Tüm kuleler aynı takım olduğunda** — Oyun bitmiyor, devam ediyor (Victory detection yok)~~ — TASK 10 ile düzeltildi
 10. **Birden fazla bağlantı aynı anda kesilirse** — Race condition potansiyeli
 
 ---
@@ -119,10 +152,10 @@
 ### Öncelik 1: Oyunu Oynanabilir Yap
 | TASK | Açıklama | Durum |
 |------|----------|-------|
-| 10 | **Victory/Defeat Detection** — Tüm kuleler tek takıma geçince oyun bitsin | ⬜ |
-| 11 | **Victory/Defeat UI Ekranı** — Kazanma/kaybetme pop-up'ı | ⬜ |
-| 12 | **Restart Butonu** — Oyun bitince veya istediğinde yeniden başlat | ⬜ |
-| 13 | **Pause / Speed Control** — 1x / 2x / 3x hız değiştirme | ⬜ |
+| 10 | **Victory/Defeat Detection** — Tüm kuleler tek takıma geçince oyun bitsin | ✅ |
+| 11 | **Victory/Defeat UI Ekranı** — Kazanma/kaybetme pop-up'ı | ✅ |
+| 12 | **Restart Butonu** — Oyun bitince veya istediğinde yeniden başlat | ✅ |
+| 13 | **Pause / Speed Control** — 1x / 2x / 3x hız değiştirme | ✅ |
 
 ### Öncelik 2: Teknik Borç & Temel İyileştirmeler
 | TASK | Açıklama | Durum |
@@ -245,7 +278,8 @@ Assets/
 │   ├── TowerConnection.cs
 │   ├── TowerStatsSO.cs
 │   ├── TeamData.cs
-│   └── LookAtCamera.cs
+│   ├── LookAtCamera.cs
+│   └── GameUIController.cs
 ├── ScriptableObjects/
 │   └── TowerStats/
 ├── Prefabs/
@@ -268,4 +302,4 @@ Assets/
 
 ---
 
-*Son güncelleme: Şubat 2026 — TASK 1-9 tamamlandı, gerçek durum koda göre güncellendi*
+*Son güncelleme: Şubat 2026 — TASK 1-13 + TASK 16 tamamlandı. Phase 1 (Oyunu Oynanabilir Yap) tamamlandı!*

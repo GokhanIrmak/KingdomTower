@@ -412,6 +412,12 @@ namespace KingdomTower
             UpdateTowerState();
 
             Debug.Log($"{gameObject.name} captured by {newTeam}!");
+
+            // Notify GameManager to check victory/defeat
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.CheckGameEndCondition();
+            }
         }
 
         private void UpdateVisuals()

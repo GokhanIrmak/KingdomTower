@@ -1,7 +1,17 @@
+using System;
 using UnityEngine;
 
 namespace KingdomTower
 {
+    /// <summary>
+    /// Represents the outcome of a finished game.
+    /// </summary>
+    public enum GameResult
+    {
+        Victory,  // Player (BlueTeam) captured all towers
+        Defeat    // Enemy (RedTeam) captured all towers
+    }
+
     /// <summary>
     /// Main game manager that handles overall game state using the singleton pattern.
     /// For the MVP, this manages basic game flow (play/pause) and can be extended for level management.
@@ -25,8 +35,20 @@ namespace KingdomTower
         [Header("Game State")]
         [SerializeField] private bool isGameActive = true;
 
+        [Header("Victory/Defeat")]
+        [SerializeField] private float endCheckDelay = 0.5f; // Small delay to let state settle
+
+        [Header("Speed Control")]
+        [SerializeField] private float[] speedSteps = { 1f, 2f, 3f };
+        private int currentSpeedIndex;
+
+        // Events
+        public event Action<GameResult> OnGameEnded;
+        public event Action<float> OnSpeedChanged;
+
         // Properties
         public bool IsGameActive => isGameActive;
+        public float CurrentSpeed => speedSteps[currentSpeedIndex];
 
         #region Unity Lifecycle
 
@@ -93,14 +115,14 @@ namespace KingdomTower
         }
 
         /// <summary>
-        /// Ends the current game session.
+        /// Ends the current game session (manual / external call).
         /// </summary>
         public void EndGame()
         {
-            isGameActive = false;
-            Debug.Log("Game ended");
+            if (!isGameActive) return;
 
-            // Future: Show end game screen, save score, etc.
+            isGameActive = false;
+            Debug.Log("Game ended (manual)");
         }
 
         /// <summary>
@@ -110,6 +132,8 @@ namespace KingdomTower
         {
             Debug.Log("Restarting level...");
 
+            Time.timeScale = 1f; // Reset speed before reload
+
             // Reload the current scene
             UnityEngine.SceneManagement.SceneManager.LoadScene(
                 UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex
@@ -118,26 +142,90 @@ namespace KingdomTower
 
         #endregion
 
-        #region Victory/Defeat Conditions (Future Expansion)
+        #region Speed Control
 
         /// <summary>
-        /// Checks if the player has won the level.
-        /// This is a placeholder for future implementation.
+        /// Cycles to the next speed step (1x → 2x → 3x → 1x).
         /// </summary>
-        public void CheckVictoryCondition()
+        public void CycleSpeed()
         {
-            // Future: Check if all enemy towers are captured
-            // For now, this is just a stub
+            if (!isGameActive) return;
+
+            currentSpeedIndex = (currentSpeedIndex + 1) % speedSteps.Length;
+            ApplySpeed();
+        }
+
+        private void ApplySpeed()
+        {
+            float speed = speedSteps[currentSpeedIndex];
+            Time.timeScale = speed;
+
+            OnSpeedChanged?.Invoke(speed);
+        }
+
+        #endregion
+
+        #region Victory/Defeat Conditions
+
+        /// <summary>
+        /// Called by TowerController when a tower changes ownership.
+        /// Schedules a game-end check after a short delay so state can settle.
+        /// </summary>
+        public void CheckGameEndCondition()
+        {
+            if (!isGameActive) return;
+
+            // Use Invoke to avoid checking mid-frame during cascading ownership changes
+            CancelInvoke(nameof(EvaluateGameEnd));
+            Invoke(nameof(EvaluateGameEnd), endCheckDelay);
+        }
+
+        private void EvaluateGameEnd()
+        {
+            if (!isGameActive) return;
+
+            TowerController[] allTowers = FindObjectsOfType<TowerController>();
+
+            if (allTowers.Length == 0) return;
+
+            // Check if all towers belong to a single non-neutral team
+            Team? dominantTeam = null;
+
+            foreach (var tower in allTowers)
+            {
+                // If any tower is still neutral, no winner yet
+                if (tower.CurrentTeam == Team.Neutral)
+                    return;
+
+                if (dominantTeam == null)
+                {
+                    dominantTeam = tower.CurrentTeam;
+                }
+                else if (tower.CurrentTeam != dominantTeam)
+                {
+                    // Multiple teams still alive — game continues
+                    return;
+                }
+            }
+
+            // All towers belong to one team
+            GameResult result = dominantTeam == Team.BlueTeam
+                ? GameResult.Victory
+                : GameResult.Defeat;
+
+            EndGame(result);
         }
 
         /// <summary>
-        /// Checks if the player has lost the level.
-        /// This is a placeholder for future implementation.
+        /// Ends the game with the given result.
         /// </summary>
-        public void CheckDefeatCondition()
+        private void EndGame(GameResult result)
         {
-            // Future: Check if all player towers are lost
-            // For now, this is just a stub
+            isGameActive = false;
+
+            Debug.Log($"Game Over — {result}!");
+
+            OnGameEnded?.Invoke(result);
         }
 
         #endregion
