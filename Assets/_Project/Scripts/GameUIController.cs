@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 using TMPro;
 
@@ -92,6 +94,15 @@ namespace KingdomTower
             scaler.matchWidthOrHeight = 0.5f;
 
             canvasObj.AddComponent<GraphicRaycaster>();
+
+            // --- EventSystem (required for button clicks) ---
+            if (FindObjectOfType<EventSystem>() == null)
+            {
+                GameObject eventSystemObj = new GameObject("EventSystem");
+                eventSystemObj.transform.SetParent(transform);
+                eventSystemObj.AddComponent<EventSystem>();
+                eventSystemObj.AddComponent<InputSystemUIInputModule>();
+            }
 
             // --- Speed button (top-right corner, always visible during gameplay) ---
             CreateSpeedButton(canvasObj.transform);

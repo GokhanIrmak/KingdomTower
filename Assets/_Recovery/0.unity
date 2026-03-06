@@ -593,7 +593,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1620393057}
   - component: {fileID: 1620393056}
-  - component: {fileID: 1620393058}
   m_Layer: 0
   m_Name: _GameManager
   m_TagString: Untagged
@@ -634,23 +633,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1620393058
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1620393055}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36464a43e128ca44e9b99277f229f660, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::KingdomTower.GameUIController
-  victoryColor: {r: 0.2, g: 0.6, b: 1, a: 1}
-  defeatColor: {r: 1, g: 0.3, b: 0.3, a: 1}
-  overlayColor: {r: 0, g: 0, b: 0, a: 0.6}
-  buttonColor: {r: 1, g: 1, b: 1, a: 0.9}
-  buttonTextColor: {r: 0.1, g: 0.1, b: 0.1, a: 1}
 --- !u!1001 &5110507952122815476
 PrefabInstance:
   m_ObjectHideFlags: 0
